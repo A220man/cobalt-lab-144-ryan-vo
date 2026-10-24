@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "name": "cobalt-lab-144-ryan-vo",
+  "owner": "A220man",
+  "email": "ryandtvo@gmail.com",
+  "domain": "AI/ML developer tools",
+  "summary": "Work in progress: cobalt-lab-144-ryan-vo",
+  "workflows": [
+    "Quick audit profile: single hunter wave with rapid coverage assessment",
+    "Standard audit profile: two hunter waves with critic review and validation phase",
+    "Deep audit profile: full verification pipeline with independent re-checking of all findings"
+  ],
+  "auth": "oidc-keycloak-saml-broker",
+  "llm_providers": [
+    "openai-compatible",
+    "anthropic",
+    "gemini",
+    "ollama"
+  ],
+  "status": "work-in-progress"
+}
