@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./cobalt_lab.db
+      - CORS_ORIGINS=["http://localhost:5173","http://127.0.0.1:5173"]
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-change-in-production}
+      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL:-http://localhost:8080/realms/cobalt-lab}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID:-cobalt-lab}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:-}
+      - OIDC_REDIRECT_URI=${OIDC_REDIRECT_URI:-http://localhost:5173/callback}
+    volumes:
+      - backend-data:/app
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:5173:5173"
+    environment:
+      - VITE_API_BASE=/api/v1
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - keycloak-data:/opt/keycloak/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  backend-data:
+  keycloak-data:
