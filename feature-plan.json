@@ -1,83 +1,13 @@
 {
   "schema_version": 1,
-  "current_feature": "skeleton-fastapi-react",
+  "current_feature": "continue-implementation",
   "features": [
     {
-      "id": "skeleton-fastapi-react",
-      "title": "Runnable FastAPI + React skeleton with one end-to-end workflow",
-      "status": "done",
+      "id": "continue-implementation",
+      "title": "Continue implementation and resolve known failures",
+      "status": "in_progress",
       "acceptance": [
-        "FastAPI backend starts and serves /health endpoint",
-        "React frontend builds and loads",
-        "One complete create/read workflow works across HTTP boundary",
-        "pytest backend tests pass",
-        "npm frontend build/test pass",
-        "Dockerfiles build for both services"
-      ],
-      "implementation": [
-        "backend/app/main.py",
-        "backend/requirements.txt",
-        "backend/tests/test_health.py",
-        "frontend/package.json",
-        "frontend/src/main.tsx",
-        "frontend/src/App.tsx",
-        "frontend/vite.config.ts",
-        "Dockerfile.backend",
-        "Dockerfile.frontend",
-        "compose.yaml"
-      ],
-      "tests": [
-        "backend/tests/test_health.py",
-        "frontend/src/App.test.tsx"
-      ]
-    },
-    {
-      "id": "audit-core-domain",
-      "title": "Core audit domain engine (coverage ledger, findings, verification)",
-      "status": "planned",
-      "acceptance": [
-        "Coverage ledger CRUD with persistence",
-        "Findings schema with validation",
-        "Independent verification phase",
-        "Machine-readable JSON output"
-      ],
-      "implementation": [],
-      "tests": []
-    },
-    {
-      "id": "oidc-auth-keycloak",
-      "title": "OIDC authentication with Keycloak (authorization code + PKCE)",
-      "status": "planned",
-      "acceptance": [
-        "Login/callback flow works",
-        "HttpOnly cookies + CSRF protection",
-        "Role-based authorization on all data endpoints",
-        "Logout works"
-      ],
-      "implementation": [],
-      "tests": []
-    },
-    {
-      "id": "llm-adapters",
-      "title": "LLM provider adapters (OpenAI-compatible, Anthropic, Gemini, Ollama)",
-      "status": "planned",
-      "acceptance": [
-        "Configurable provider/model/endpoint",
-        "Bounded timeouts and redacted errors",
-        "Opt-in advisory explanations"
-      ],
-      "implementation": [],
-      "tests": []
-    },
-    {
-      "id": "audit-workflows",
-      "title": "Three complete audit workflows (quick/standard/deep profiles)",
-      "status": "planned",
-      "acceptance": [
-        "Quick profile: single hunter wave",
-        "Standard profile: two hunter waves + critic",
-        "Deep profile: full verification phase",
-        "Deterministic offline core"
+        "Run checks, fix failures, and implement the next planned feature"
       ],
       "implementation": [],
       "tests": []
