@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.0.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
@@ -23,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .env.example with all configuration options
 - Comprehensive README with install/run/test instructions
 - MIT LICENSE
+- Core audit domain engine (coverage ledger, findings, verification)
+  - CoverageUnit and Finding models with status enums
+  - Pydantic schemas for validation and JSON export
+  - REST API endpoints for coverage units and findings CRUD
+  - Machine-readable JSON export endpoints (coverage-ledger, findings)
+  - Database integration with automatic migrations
 
 ### Fixed
 - Backend test database initialization (session-scoped fixture)
