@@ -1,8 +1,23 @@
 # Changelog
 
-## 1.1.0 — work-in-progress checkpoint
+## 1.2.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.1.0 — 2026-11-05
+
+### Added
+- Comprehensive audit API test suite (12 tests): coverage unit CRUD, finding CRUD, export endpoints
+- Filtering support for coverage units (by attack_class, status) and findings (by attack_class, status, severity)
+
+### Fixed
+- datetime.utcnow() deprecation warnings in audit export endpoints (use timezone-aware datetime.now(timezone.utc))
+- Backend test database now properly registers audit models
+
+### Tests
+- All 18 backend tests passing (6 existing + 12 new audit tests)
+- All 3 frontend tests passing
+
 
 ## 1.0.0 — work-in-progress checkpoint
 
