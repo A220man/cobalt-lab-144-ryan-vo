@@ -10,8 +10,22 @@ continue-implementation
 
 ### continue-implementation — Continue implementation and resolve known failures
 
-Status: in_progress
+Status: done
 
 Acceptance:
 - Run checks, fix failures, and implement the next planned feature
+
+Implementation: `backend/tests/test_audit.py`, `backend/app/api/v1/audit.py`
+
+Tests: `backend/tests/test_audit.py::test_create_coverage_unit`, `backend/tests/test_audit.py::test_list_coverage_units`, `backend/tests/test_audit.py::test_get_coverage_unit`, `backend/tests/test_audit.py::test_update_coverage_unit`, `backend/tests/test_audit.py::test_delete_coverage_unit`, `backend/tests/test_audit.py::test_create_finding`, `backend/tests/test_audit.py::test_list_findings`, `backend/tests/test_audit.py::test_get_finding`, `backend/tests/test_audit.py::test_update_finding`, `backend/tests/test_audit.py::test_delete_finding`, `backend/tests/test_audit.py::test_export_coverage_ledger`, `backend/tests/test_audit.py::test_export_findings`
+
+### auth-authorization — Add authentication and authorization layer
+
+Status: planned
+
+Acceptance:
+- Implement JWT token validation middleware
+- Add role-based access control (viewer, operator, admin)
+- Protect audit endpoints with authentication
+- Add OIDC/Keycloak integration tests
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict
 
 from app.core.database import get_db
@@ -149,7 +149,7 @@ async def export_coverage_ledger(db: AsyncSession = Depends(get_db)):
     
     return CoverageLedgerExport(
         units=units,
-        generated_at=datetime.utcnow(),
+        generated_at=datetime.now(timezone.utc),
         total_units=len(units),
         by_status=by_status,
         by_attack_class=by_attack_class
@@ -172,7 +172,7 @@ async def export_findings(db: AsyncSession = Depends(get_db)):
     
     return FindingsExport(
         findings=findings,
-        generated_at=datetime.utcnow(),
+        generated_at=datetime.now(timezone.utc),
         total_findings=len(findings),
         by_status=by_status,
         by_severity=by_severity,
