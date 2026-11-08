@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import List, Dict
 
 from app.core.database import get_db
+from app.core.auth import require_viewer, require_operator, require_admin, TokenData
 from app.models.audit import CoverageUnit, Finding, UnitStatus, FindingStatus, Severity
 from app.schemas.audit import (
     CoverageUnitCreate, CoverageUnitUpdate, CoverageUnitRead,
@@ -17,7 +18,11 @@ router = APIRouter(prefix="/audit", tags=["audit"])
 # Coverage Unit endpoints
 
 @router.post("/units", response_model=CoverageUnitRead, status_code=status.HTTP_201_CREATED)
-async def create_coverage_unit(unit_in: CoverageUnitCreate, db: AsyncSession = Depends(get_db)):
+async def create_coverage_unit(
+    unit_in: CoverageUnitCreate, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_operator)
+):
     unit = CoverageUnit(**unit_in.model_dump())
     db.add(unit)
     await db.commit()
@@ -28,7 +33,8 @@ async def create_coverage_unit(unit_in: CoverageUnitCreate, db: AsyncSession = D
 @router.get("/units", response_model=List[CoverageUnitRead])
 async def list_coverage_units(
     skip: int = 0, limit: int = 100, attack_class: str = None, status: UnitStatus = None,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
 ):
     query = select(CoverageUnit)
     if attack_class:
@@ -41,7 +47,11 @@ async def list_coverage_units(
 
 
 @router.get("/units/{unit_id}", response_model=CoverageUnitRead)
-async def get_coverage_unit(unit_id: str, db: AsyncSession = Depends(get_db)):
+async def get_coverage_unit(
+    unit_id: str, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
+):
     result = await db.execute(select(CoverageUnit).where(CoverageUnit.unit_id == unit_id))
     unit = result.scalar_one_or_none()
     if not unit:
@@ -50,7 +60,12 @@ async def get_coverage_unit(unit_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.patch("/units/{unit_id}", response_model=CoverageUnitRead)
-async def update_coverage_unit(unit_id: str, unit_in: CoverageUnitUpdate, db: AsyncSession = Depends(get_db)):
+async def update_coverage_unit(
+    unit_id: str, 
+    unit_in: CoverageUnitUpdate, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_operator)
+):
     result = await db.execute(select(CoverageUnit).where(CoverageUnit.unit_id == unit_id))
     unit = result.scalar_one_or_none()
     if not unit:
@@ -63,7 +78,11 @@ async def update_coverage_unit(unit_id: str, unit_in: CoverageUnitUpdate, db: As
 
 
 @router.delete("/units/{unit_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_coverage_unit(unit_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_coverage_unit(
+    unit_id: str, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_admin)
+):
     result = await db.execute(select(CoverageUnit).where(CoverageUnit.unit_id == unit_id))
     unit = result.scalar_one_or_none()
     if not unit:
@@ -75,7 +94,11 @@ async def delete_coverage_unit(unit_id: str, db: AsyncSession = Depends(get_db))
 # Finding endpoints
 
 @router.post("/findings", response_model=FindingRead, status_code=status.HTTP_201_CREATED)
-async def create_finding(finding_in: FindingCreate, db: AsyncSession = Depends(get_db)):
+async def create_finding(
+    finding_in: FindingCreate, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_operator)
+):
     finding = Finding(**finding_in.model_dump())
     db.add(finding)
     await db.commit()
@@ -87,7 +110,8 @@ async def create_finding(finding_in: FindingCreate, db: AsyncSession = Depends(g
 async def list_findings(
     skip: int = 0, limit: int = 100, attack_class: str = None, 
     finding_status: FindingStatus = None, severity: Severity = None,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
 ):
     query = select(Finding)
     if attack_class:
@@ -102,7 +126,11 @@ async def list_findings(
 
 
 @router.get("/findings/{finding_id}", response_model=FindingRead)
-async def get_finding(finding_id: str, db: AsyncSession = Depends(get_db)):
+async def get_finding(
+    finding_id: str, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
+):
     result = await db.execute(select(Finding).where(Finding.finding_id == finding_id))
     finding = result.scalar_one_or_none()
     if not finding:
@@ -111,7 +139,12 @@ async def get_finding(finding_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.patch("/findings/{finding_id}", response_model=FindingRead)
-async def update_finding(finding_id: str, finding_in: FindingUpdate, db: AsyncSession = Depends(get_db)):
+async def update_finding(
+    finding_id: str, 
+    finding_in: FindingUpdate, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_operator)
+):
     result = await db.execute(select(Finding).where(Finding.finding_id == finding_id))
     finding = result.scalar_one_or_none()
     if not finding:
@@ -124,7 +157,11 @@ async def update_finding(finding_id: str, finding_in: FindingUpdate, db: AsyncSe
 
 
 @router.delete("/findings/{finding_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_finding(finding_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_finding(
+    finding_id: str, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_admin)
+):
     result = await db.execute(select(Finding).where(Finding.finding_id == finding_id))
     finding = result.scalar_one_or_none()
     if not finding:
@@ -136,7 +173,10 @@ async def delete_finding(finding_id: str, db: AsyncSession = Depends(get_db)):
 # Export endpoints
 
 @router.get("/export/coverage-ledger", response_model=CoverageLedgerExport)
-async def export_coverage_ledger(db: AsyncSession = Depends(get_db)):
+async def export_coverage_ledger(
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
+):
     result = await db.execute(select(CoverageUnit))
     units = result.scalars().all()
     
@@ -157,7 +197,10 @@ async def export_coverage_ledger(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/export/findings", response_model=FindingsExport)
-async def export_findings(db: AsyncSession = Depends(get_db)):
+async def export_findings(
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
+):
     result = await db.execute(select(Finding))
     findings = result.scalars().all()
     

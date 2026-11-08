@@ -21,11 +21,15 @@ Tests: `backend/tests/test_audit.py::test_create_coverage_unit`, `backend/tests/
 
 ### auth-authorization — Add authentication and authorization layer
 
-Status: planned
+Status: done
 
 Acceptance:
 - Implement JWT token validation middleware
 - Add role-based access control (viewer, operator, admin)
 - Protect audit endpoints with authentication
 - Add OIDC/Keycloak integration tests
+
+Implementation: `backend/app/core/auth.py`, `backend/app/models/auth.py`, `backend/app/schemas/auth.py`, `backend/app/api/v1/auth.py`, `backend/app/api/v1/audit.py`, `backend/app/api/v1/items.py`
+
+Tests: `backend/tests/test_audit.py`, `backend/tests/test_items.py`, `backend/tests/conftest.py`
 

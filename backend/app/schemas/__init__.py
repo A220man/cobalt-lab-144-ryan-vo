@@ -5,11 +5,13 @@ from app.schemas.audit import (
     CoverageLedgerExport, FindingsExport,
     UnitStatus, FindingStatus, Severity
 )
+from app.schemas.auth import TokenData, TokenResponse, UserRole, LoginRequest, RefreshTokenRequest
 
 __all__ = [
     "ItemBase", "ItemCreate", "ItemUpdate", "ItemRead",
     "CoverageUnitBase", "CoverageUnitCreate", "CoverageUnitUpdate", "CoverageUnitRead",
     "FindingBase", "FindingCreate", "FindingUpdate", "FindingRead",
     "CoverageLedgerExport", "FindingsExport",
-    "UnitStatus", "FindingStatus", "Severity"
+    "UnitStatus", "FindingStatus", "Severity",
+    "TokenData", "TokenResponse", "UserRole", "LoginRequest", "RefreshTokenRequest"
 ]

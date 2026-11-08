@@ -31,15 +31,26 @@
     {
       "id": "auth-authorization",
       "title": "Add authentication and authorization layer",
-      "status": "planned",
+      "status": "done",
       "acceptance": [
         "Implement JWT token validation middleware",
         "Add role-based access control (viewer, operator, admin)",
         "Protect audit endpoints with authentication",
         "Add OIDC/Keycloak integration tests"
       ],
-      "implementation": [],
-      "tests": []
+      "implementation": [
+        "backend/app/core/auth.py",
+        "backend/app/models/auth.py",
+        "backend/app/schemas/auth.py",
+        "backend/app/api/v1/auth.py",
+        "backend/app/api/v1/audit.py",
+        "backend/app/api/v1/items.py"
+      ],
+      "tests": [
+        "backend/tests/test_audit.py",
+        "backend/tests/test_items.py",
+        "backend/tests/conftest.py"
+      ]
     }
   ]
 }

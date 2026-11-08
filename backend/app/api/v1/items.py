@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.database import get_db
+from app.core.auth import require_viewer, require_operator, require_admin, TokenData
 from app.models.item import Item
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 
@@ -10,7 +11,11 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 
 @router.post("", response_model=ItemRead, status_code=status.HTTP_201_CREATED)
-async def create_item(item_in: ItemCreate, db: AsyncSession = Depends(get_db)):
+async def create_item(
+    item_in: ItemCreate, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_operator)
+):
     item = Item(name=item_in.name, description=item_in.description)
     db.add(item)
     await db.commit()
@@ -19,13 +24,21 @@ async def create_item(item_in: ItemCreate, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("", response_model=list[ItemRead])
-async def list_items(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
+async def list_items(
+    skip: int = 0, limit: int = 100, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
+):
     result = await db.execute(select(Item).offset(skip).limit(limit))
     return result.scalars().all()
 
 
 @router.get("/{item_id}", response_model=ItemRead)
-async def get_item(item_id: int, db: AsyncSession = Depends(get_db)):
+async def get_item(
+    item_id: int, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_viewer)
+):
     result = await db.execute(select(Item).where(Item.id == item_id))
     item = result.scalar_one_or_none()
     if not item:
@@ -34,7 +47,12 @@ async def get_item(item_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.patch("/{item_id}", response_model=ItemRead)
-async def update_item(item_id: int, item_in: ItemUpdate, db: AsyncSession = Depends(get_db)):
+async def update_item(
+    item_id: int, 
+    item_in: ItemUpdate, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_operator)
+):
     result = await db.execute(select(Item).where(Item.id == item_id))
     item = result.scalar_one_or_none()
     if not item:
@@ -49,7 +67,11 @@ async def update_item(item_id: int, item_in: ItemUpdate, db: AsyncSession = Depe
 
 
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_item(item_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_item(
+    item_id: int, 
+    db: AsyncSession = Depends(get_db),
+    token_data: TokenData = Depends(require_admin)
+):
     result = await db.execute(select(Item).where(Item.id == item_id))
     item = result.scalar_one_or_none()
     if not item:
