@@ -1,8 +1,24 @@
 # Changelog
 
-## 1.3.0 — work-in-progress checkpoint
+## 1.4.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.3.0 — work-in-progress checkpoint
+
+### Added
+- `preserved_uses` field to Finding model for tracking legitimate uses that must remain functional after remediation (addresses issue #88 from reference product)
+- `preserved_uses` support in Finding schemas (create, update, read, export)
+- 3 new tests for preserved_uses CRUD operations
+
+### Fixed
+- Test database fixture now drops and recreates tables at session start to pick up schema changes
+
+### Tests
+- All 21 backend tests passing (15 audit + 3 health + 3 items)
+- All 3 frontend tests passing
+
+---
 
 ## 1.2.0 — work-in-progress checkpoint
 
@@ -29,7 +45,7 @@ Partial code published for continued development. Known issues: STATUS.md.
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2026-10-24
@@ -58,3 +74,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Item schema datetime serialization to ISO format strings
 - Frontend test setup (vitest expect global, jest-dom dynamic import)
 - Frontend TypeScript build (excluded test files from compilation)
+
