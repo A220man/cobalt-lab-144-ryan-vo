@@ -68,6 +68,7 @@ class FindingBase(BaseModel):
     description: str
     attack_class: str
     severity: Severity = Severity.INFO
+    preserved_uses: Optional[str] = None
 
 
 class FindingCreate(FindingBase):
@@ -82,6 +83,7 @@ class FindingUpdate(BaseModel):
     status: Optional[FindingStatus] = None
     evidence: Optional[str] = None
     remediation: Optional[str] = None
+    preserved_uses: Optional[str] = None
 
 
 class FindingRead(FindingBase):
@@ -89,6 +91,7 @@ class FindingRead(FindingBase):
     status: FindingStatus
     evidence: Optional[str] = None
     remediation: Optional[str] = None
+    preserved_uses: Optional[str] = None
     verified_at: Optional[datetime] = None
     verified_by: Optional[str] = None
     created_at: datetime

@@ -98,9 +98,12 @@ async def admin_client(app, admin_token):
 async def init_test_db(app):
     # Import models to register them
     from app.models import audit, auth, item  # noqa: F401
+    # Drop and recreate tables to pick up schema changes
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     yield
     # Cleanup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+

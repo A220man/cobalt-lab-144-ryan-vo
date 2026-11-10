@@ -62,6 +62,7 @@ class Finding(Base):
     status = Column(SQLEnum(FindingStatus), default=FindingStatus.PLANNED, nullable=False, index=True)
     evidence = Column(Text, nullable=True)  # JSON serialized evidence
     remediation = Column(Text, nullable=True)  # JSON serialized remediation
+    preserved_uses = Column(Text, nullable=True)  # JSON array of {who, path, how_it_keeps_working}
     verified_at = Column(DateTime(timezone=True), nullable=True)
     verified_by = Column(String(64), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

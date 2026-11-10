@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
+import json
 
 from app.main import create_app
 from app.core.database import engine, Base, async_session_maker
@@ -218,7 +219,10 @@ async def test_list_findings(viewer_client: AsyncClient, operator_client: AsyncC
     assert response.status_code == 200
     data = response.json()
     assert len(data) >= 2
-    # Filter findings for our unit only\n    unit_findings = [f for f in data if f["unit_id"] == unit_id]\n    assert len(unit_findings) >= 2\n    assert all(f["attack_class"] == "auth-bypass" for f in unit_findings)
+    # Filter findings for our unit only
+    unit_findings = [f for f in data if f["unit_id"] == unit_id]
+    assert len(unit_findings) >= 2
+    assert all(f["attack_class"] == "auth-bypass" for f in unit_findings)
 
 
 @pytest.mark.asyncio
@@ -368,3 +372,129 @@ async def test_export_findings(viewer_client: AsyncClient, operator_client: Asyn
     assert "findings" in data
     assert "total_findings" in data
     assert data["total_findings"] >= 1
+
+
+@pytest.mark.asyncio
+async def test_create_finding_preserved_uses(operator_client: AsyncClient):
+    # First create a coverage unit
+    unit_resp = await operator_client.post(
+        "/api/v1/audit/units",
+        json={
+            "unit_id": "CU-014",
+            "title": "Preserved Uses Test Unit",
+            "attack_class": "auth-bypass",
+        },
+    )
+    unit_id = unit_resp.json()["id"]
+
+    preserved_uses = [
+        {"who": "plugin-author", "path": "POST /api/v1/plugins/{id}/execute", "how_it_keeps_working": "Plugin uses caller own stored credentials via consent flow"},
+        {"who": "platform-admin", "path": "GET /api/v1/admin/audit", "how_it_keeps_working": "Admin API uses service account, unchanged"}
+    ]
+    
+    response = await operator_client.post(
+        "/api/v1/audit/findings",
+        json={
+            "finding_id": "F-008",
+            "unit_id": unit_id,
+            "title": "Credential Leakage",
+            "description": "Plugin can access caller credentials",
+            "attack_class": "auth-bypass",
+            "severity": "high",
+            "preserved_uses": json.dumps(preserved_uses),
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["finding_id"] == "F-008"
+    assert data["preserved_uses"] is not None
+    # Verify the preserved_uses content
+    parsed = json.loads(data["preserved_uses"])
+    assert len(parsed) == 2
+    assert parsed[0]["who"] == "plugin-author"
+    assert parsed[1]["who"] == "platform-admin"
+
+
+@pytest.mark.asyncio
+async def test_update_finding_preserved_uses(operator_client: AsyncClient):
+    unit_resp = await operator_client.post(
+        "/api/v1/audit/units",
+        json={
+            "unit_id": "CU-015",
+            "title": "Update Preserved Uses Unit",
+            "attack_class": "crypto",
+        },
+    )
+    unit_id = unit_resp.json()["id"]
+
+    finding_resp = await operator_client.post(
+        "/api/v1/audit/findings",
+        json={
+            "finding_id": "F-009",
+            "unit_id": unit_id,
+            "title": "Weak Crypto",
+            "description": "Using MD5",
+            "attack_class": "crypto",
+            "severity": "medium",
+        },
+    )
+    finding_id = finding_resp.json()["finding_id"]
+
+    # Update with preserved_uses
+    preserved_uses = [
+        {"who": "legacy-client", "path": "GET /api/v1/legacy/data", "how_it_keeps_working": "Legacy clients use compatibility mode with explicit opt-in"}
+    ]
+    
+    response = await operator_client.patch(
+        f"/api/v1/audit/findings/{finding_id}",
+        json={
+            "title": "Weak Crypto - Updated",
+            "preserved_uses": json.dumps(preserved_uses),
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "Weak Crypto - Updated"
+    assert data["preserved_uses"] is not None
+    parsed = json.loads(data["preserved_uses"])
+    assert len(parsed) == 1
+    assert parsed[0]["who"] == "legacy-client"
+
+
+@pytest.mark.asyncio
+async def test_export_findings_preserved_uses(viewer_client: AsyncClient, operator_client: AsyncClient):
+    unit_resp = await operator_client.post(
+        "/api/v1/audit/units",
+        json={"unit_id": "CU-016", "title": "Export Preserved Uses Unit", "attack_class": "injection"},
+    )
+    unit_id = unit_resp.json()["id"]
+
+    preserved_uses = [
+        {"who": "api-consumer", "path": "POST /api/v1/data", "how_it_keeps_working": "API consumers use their own credentials via token exchange"}
+    ]
+    
+    await operator_client.post(
+        "/api/v1/audit/findings",
+        json={
+            "finding_id": "F-010",
+            "unit_id": unit_id,
+            "title": "Export Preserved Uses Finding",
+            "description": "Test",
+            "attack_class": "injection",
+            "severity": "high",
+            "preserved_uses": json.dumps(preserved_uses),
+        },
+    )
+
+    response = await viewer_client.get("/api/v1/audit/export/findings")
+    assert response.status_code == 200
+    data = response.json()
+    assert "findings" in data
+    assert data["total_findings"] >= 1
+    # Find our exported finding
+    exported = next((f for f in data["findings"] if f["finding_id"] == "F-010"), None)
+    assert exported is not None
+    assert exported["preserved_uses"] is not None
+    parsed = json.loads(exported["preserved_uses"])
+    assert len(parsed) == 1
+    assert parsed[0]["who"] == "api-consumer"
