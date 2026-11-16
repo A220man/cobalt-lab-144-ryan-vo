@@ -1,6 +1,6 @@
 [project]
 name = "cobalt-lab"
-version = "1.0.0"
+version = "1.5.0"
 description = "A coding-agent skill for multi-phase security audits with independently verified, machine-readable findings"
 readme = "README.md"
 authors = [{name = "Ryan Vo", email = "ryandtvo@gmail.com"}]

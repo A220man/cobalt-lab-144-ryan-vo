@@ -94,7 +94,7 @@ async def admin_client(app, admin_token):
         yield ac
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 async def init_test_db(app):
     # Import models to register them
     from app.models import audit, auth, item  # noqa: F401
