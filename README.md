@@ -1,6 +1,6 @@
 # Cobalt Lab | AI & Machine Learning — Ryan Vo
 
-Current version: `1.5.0`.
+Current version: `1.6.0`.
 
 > Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
 
@@ -121,6 +121,16 @@ docker compose run --rm frontend npm test
 GET /api/v1/health
 ```
 Returns service status.
+
+### Audit Export (filtered)
+```
+GET /api/v1/audit/export/coverage-ledger?attack_class=&status=
+GET /api/v1/audit/export/findings?attack_class=&finding_status=&severity=
+```
+Both export endpoints accept optional filters. `total_*` and `by_*` aggregates
+in the response reflect the filtered set. Valid `status` values: `planned`,
+`in_progress`, `deferred`, `completed`. Valid `severity` values: `critical`,
+`high`, `medium`, `low`, `info`.
 
 ### Items (Demo CRUD)
 ```

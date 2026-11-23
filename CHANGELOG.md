@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.6.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.6.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
+### Added
+- Filtering on `GET /api/v1/audit/export/coverage-ledger` (`attack_class`, `status` query params)
+- Filtering on `GET /api/v1/audit/export/findings` (`attack_class`, `finding_status`, `severity` query params)
+- Export `total_*` and `by_*` aggregates now reflect the filtered set
+- 2 new tests covering export filtering and empty-match cases
+
+### Tests
+- All 23 backend tests passing (17 audit + 1 health + 5 items)
+
 ## 1.5.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.

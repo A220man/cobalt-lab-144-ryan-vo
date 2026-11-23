@@ -174,10 +174,16 @@ async def delete_finding(
 
 @router.get("/export/coverage-ledger", response_model=CoverageLedgerExport)
 async def export_coverage_ledger(
+    attack_class: str = None, status: UnitStatus = None,
     db: AsyncSession = Depends(get_db),
     token_data: TokenData = Depends(require_viewer)
 ):
-    result = await db.execute(select(CoverageUnit))
+    query = select(CoverageUnit)
+    if attack_class:
+        query = query.where(CoverageUnit.attack_class == attack_class)
+    if status:
+        query = query.where(CoverageUnit.status == status)
+    result = await db.execute(query)
     units = result.scalars().all()
     
     by_status: Dict[str, int] = {}
@@ -198,10 +204,18 @@ async def export_coverage_ledger(
 
 @router.get("/export/findings", response_model=FindingsExport)
 async def export_findings(
+    attack_class: str = None, finding_status: FindingStatus = None, severity: Severity = None,
     db: AsyncSession = Depends(get_db),
     token_data: TokenData = Depends(require_viewer)
 ):
-    result = await db.execute(select(Finding))
+    query = select(Finding)
+    if attack_class:
+        query = query.where(Finding.attack_class == attack_class)
+    if finding_status:
+        query = query.where(Finding.status == finding_status)
+    if severity:
+        query = query.where(Finding.severity == severity)
+    result = await db.execute(query)
     findings = result.scalars().all()
     
     by_status: Dict[str, int] = {}
