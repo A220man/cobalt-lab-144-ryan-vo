@@ -498,3 +498,89 @@ async def test_export_findings_preserved_uses(viewer_client: AsyncClient, operat
     parsed = json.loads(exported["preserved_uses"])
     assert len(parsed) == 1
     assert parsed[0]["who"] == "api-consumer"
+
+
+@pytest.mark.asyncio
+async def test_export_coverage_ledger_filter(viewer_client: AsyncClient, operator_client: AsyncClient):
+    # Two units with different attack classes; filter should only return matching.
+    await operator_client.post(
+        "/api/v1/audit/units",
+        json={"unit_id": "CU-020", "title": "Filter Export Injection", "attack_class": "injection"},
+    )
+    await operator_client.post(
+        "/api/v1/audit/units",
+        json={"unit_id": "CU-021", "title": "Filter Export Crypto", "attack_class": "crypto"},
+    )
+
+    response = await viewer_client.get(
+        "/api/v1/audit/export/coverage-ledger", params={"attack_class": "injection"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_units"] == 1
+    assert data["units"][0]["attack_class"] == "injection"
+    assert data["by_attack_class"] == {"injection": 1}
+
+    # Status filter combined with attack_class filter that matches nothing.
+    response = await viewer_client.get(
+        "/api/v1/audit/export/coverage-ledger",
+        params={"attack_class": "crypto", "status": "completed"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_units"] == 0
+    assert data["units"] == []
+
+
+@pytest.mark.asyncio
+async def test_export_findings_filter(viewer_client: AsyncClient, operator_client: AsyncClient):
+    unit_resp = await operator_client.post(
+        "/api/v1/audit/units",
+        json={"unit_id": "CU-022", "title": "Finding Filter Unit", "attack_class": "auth-bypass"},
+    )
+    unit_id = unit_resp.json()["id"]
+
+    # High-severity injection finding.
+    await operator_client.post(
+        "/api/v1/audit/findings",
+        json={
+            "finding_id": "F-020",
+            "unit_id": unit_id,
+            "title": "Filtered High",
+            "description": "High severity",
+            "attack_class": "injection",
+            "severity": "high",
+        },
+    )
+    # Low-severity crypto finding.
+    await operator_client.post(
+        "/api/v1/audit/findings",
+        json={
+            "finding_id": "F-021",
+            "unit_id": unit_id,
+            "title": "Filtered Low",
+            "description": "Low severity",
+            "attack_class": "crypto",
+            "severity": "low",
+        },
+    )
+
+    response = await viewer_client.get(
+        "/api/v1/audit/export/findings", params={"severity": "high"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_findings"] == 1
+    assert data["findings"][0]["finding_id"] == "F-020"
+    assert data["findings"][0]["severity"] == "high"
+    assert data["by_severity"] == {"high": 1}
+
+    # Combined filters: severity low + attack_class injection matches nothing.
+    response = await viewer_client.get(
+        "/api/v1/audit/export/findings",
+        params={"severity": "low", "attack_class": "injection"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_findings"] == 0
+    assert data["findings"] == []

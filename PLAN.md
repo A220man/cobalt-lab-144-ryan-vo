@@ -4,9 +4,23 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-remediation-preserved-uses
+export-filtering
 
 ## Roadmap
+
+### export-filtering — Add filtering to audit export endpoints
+
+Status: in_progress
+
+Acceptance:
+- coverage-ledger export accepts attack_class and status query filters
+- findings export accepts attack_class, finding_status, and severity query filters
+- total_* and by_* aggregates reflect the filtered set
+- tests cover filtering and empty-match cases
+
+Implementation: `backend/app/api/v1/audit.py`
+
+Tests: `backend/tests/test_audit.py::test_export_coverage_ledger_filter`, `backend/tests/test_audit.py::test_export_findings_filter`
 
 ### continue-implementation — Continue implementation and resolve known failures
 
